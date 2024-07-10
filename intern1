@@ -1,0 +1,64 @@
+import re
+
+def assess_password_strength(password):
+    # Criteria weights
+    length_weight = 0.4
+    complexity_weight = 0.4
+    uniqueness_weight = 0.2
+
+    # Initialize score
+    score = 0
+
+    # Length check
+    length = len(password)
+    if length >= 8:
+        score += length_weight
+    elif length >= 6:
+        score += length_weight / 2
+
+    # Complexity check
+    has_upper = bool(re.search(r'[A-Z]', password))
+    has_lower = bool(re.search(r'[a-z]', password))
+    has_digit = bool(re.search(r'\d', password))
+    has_special = bool(re.search(r'[@$!%*?&#]', password))
+
+    complexity_score = sum([has_upper, has_lower, has_digit, has_special]) / 4
+    score += complexity_score * complexity_weight
+
+    # Uniqueness check
+    common_patterns = ['1234', 'password', 'qwerty', 'abcd']
+    repeated_sequences = re.compile(r'(.)\1{2,}')
+    
+    if not any(pattern in password for pattern in common_patterns) and not repeated_sequences.search(password):
+        score += uniqueness_weight
+
+    # Feedback based on score
+    if score >= 0.8:
+        feedback = "Strong"
+    elif score >= 0.6:
+        feedback = "Moderate"
+    else:
+        feedback = "Weak"
+    
+    return {
+        'password': password,
+        'length': length,
+        'complexity': complexity_score,
+        'uniqueness': 1 if (not any(pattern in password for pattern in common_patterns) and not repeated_sequences.search(password)) else 0,
+        'overall_score': score,
+        'feedback': feedback
+    }
+
+# Get input from the user
+user_password = input("Enter your password: ")
+
+# Assess the password strength
+result = assess_password_strength(user_password)
+
+# Display the result
+print(f"Password: {result['password']}")
+print(f"Length: {result['length']}")
+print(f"Complexity Score: {result['complexity']:.2f}")
+print(f"Uniqueness: {result['uniqueness']}")
+print(f"Overall Score: {result['overall_score']:.2f}")
+print(f"Feedback: {result['feedback']}")
